@@ -1,0 +1,10 @@
+[mysqld]
+
+bind-address = {{{ host.private_ip }}}
+server-id = {{{ host.variables.replication_id }}}
+log-bin = {{{ module_mysql_repln.binary_log_path }}}
+
+{{#if host.variables.replication_innodb_is_used}}
+innodb_flush_log_at_trx_commit = 1
+sync_binlog = 1
+{{/if}}

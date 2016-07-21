@@ -1,0 +1,71 @@
+project:
+    name: "droid/mysql-repln"
+    description: "Configure MySQL Server for Binary Log Replication"
+
+variables:
+    module_mysql_repln:
+        binary_log_path: "/var/log/mysql/mysql-bin.log"
+
+tasks:
+    -
+      name: "Copy replication master configuration to the master"
+      command: "fs:copy"
+      arguments:
+          src: "!{{ mod_path}}/assets/mysqld_repln_master.cnf.template"
+          dest: "/etc/mysql/conf.d/mysqld_repln_master.cnf"
+      host_filter: "host.variables['replication_role'] == 'master'"
+    -
+      name: "Copy replication slave configuration to the slave"
+      command: "fs:copy"
+      arguments:
+          src: "!{{ mod_path}}/assets/mysqld_repln_slave.cnf.template"
+          dest: "/etc/mysql/conf.d/mysqld_repln_slave.cnf"
+      host_filter: "host.variables['replication_role'] == 'slave'"
+    -
+      name: "Create a MySQL user account for replication"
+      command: "mysql:adduser"
+      arguments:
+          url: "mysql://root:{{{ passwords.mysql.root }}}@localhost/"
+          username: "repln"
+          password: "{{{ passwords.mysql.repln }}}"
+          allowed-host: "%"
+          grant: "REPLICATION SLAVE"
+          grant-level: "*.*"
+      host_filter: "host.variables['replication_role'] == 'master'"
+    -
+      name: "Configure the slave with information about its master"
+      command: "mysql:master-info"
+      arguments:
+          url: "mysql://root:{{{ passwords.mysql.root }}}@localhost/"
+          master_hostname: "{{{ host.variables.replication_master_host }}}"
+          replication_username: "repln"
+          replication_password: "{{{ passwords.mysql.repln }}}"
+      host_filter: "host.variables['replication_role'] == 'slave'"
+    -
+      name: "Restart the slave MySQL service"
+      command: "service:restart"
+      arguments:
+          name: "mysql"
+      host_filter: "host.variables['replication_role'] == 'slave'"
+    -
+      name: "Restart the master MySQL service to allow replication to commence"
+      command: "service:restart"
+      arguments:
+          name: "mysql"
+      host_filter: "host.variables['replication_role'] == 'master'"
+    -
+      name: "Copy data to the master"
+      command: "fs:copy"
+      arguments:
+          src: "!{{{ host.variables.initial_data_path }}}"
+          dest: "/tmp/db-{{{ host.variables.initial_data_dbname }}}.sql"
+      host_filter: "(host.variables['replication_role'] == 'master') && host.variables['initial_data_path'] && host.variables['initial_data_dbname']"
+    -
+      name: "Load data into the master"
+      command: "mysql:load"
+      arguments:
+          url: "mysql://root:{{{ passwords.mysql.root }}}@localhost/{{{ host.variables.initial_data_dbname }}}"
+          source: "/tmp/db-{{{ host.variables.initial_data_dbname }}}.sql"
+          create: ~
+          gzip: ~
+      host_filter: "(host.variables['replication_role'] == 'master') && host.variables['initial_data_path'] && host.variables['initial_data_dbname']"
