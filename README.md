@@ -18,7 +18,7 @@ The steps involved are:-
 
 1. The MySQL Service is running on both master and slave.
 2. The MySQL Service is configured in the same fashion as the Debian
-   mysql-server package
+   mysql-server package.
 3. The MySQL Service on the master has not yet been running with binary
    logging enabled.
 4. All MySQL services will use the same MySQL user names and passwords.
@@ -38,7 +38,8 @@ The steps involved are:-
 
 ## Information required by the module
 
-1. One or more Inventory Hosts designated as master, thus:-
+1. Two or more Inventory Hosts, having a `public_ip`.
+2. One or more Inventory Hosts designated as master, thus:-
 
         my-master:
           private_ip: <ip_addr>
@@ -47,9 +48,9 @@ The steps involved are:-
             replication_id: <integer>               # must be unique among master and its slaves
             replication_innodb_is_used: <boolean>   # whether InnoDB will be used
             initial_data_dbname: <null || string>   # name of a database to seed with data
-            initial_data_path: <null || string>     # path to a SQL data file
+            initial_data_path: <null || string>     # path to a gzipped SQL data file
 
-2. One or more Inventory Hosts designated as slave, thus:-
+3. One or more Inventory Hosts designated as slave, thus:-
 
         my-slave:
           private_ip: <ip_addr>
@@ -59,7 +60,7 @@ The steps involved are:-
             replication_innodb_is_used: <boolean>
             replication_master_host: <ip_addr>      # private_ip of the corresponding master
 
-3. Password values for the following variables:-
+4. Password values for the following variables:-
 
         passwords:
           mysql:
