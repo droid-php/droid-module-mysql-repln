@@ -10,6 +10,7 @@ tasks:
     -
       name: "Copy replication master configuration to the master"
       command: "fs:copy"
+      sudo: true
       arguments:
           src: "!{{ mod_path}}/assets/mysqld_repln_master.cnf.template"
           dest: "/etc/mysql/conf.d/mysqld_repln_master.cnf"
@@ -17,6 +18,7 @@ tasks:
     -
       name: "Copy replication slave configuration to the slave"
       command: "fs:copy"
+      sudo: true
       arguments:
           src: "!{{ mod_path}}/assets/mysqld_repln_slave.cnf.template"
           dest: "/etc/mysql/conf.d/mysqld_repln_slave.cnf"
@@ -44,12 +46,14 @@ tasks:
     -
       name: "Restart the slave MySQL service"
       command: "service:restart"
+      sudo: true
       arguments:
           name: "mysql"
       host_filter: "host.variables['replication_role'] == 'slave'"
     -
       name: "Restart the master MySQL service to allow replication to commence"
       command: "service:restart"
+      sudo: true
       arguments:
           name: "mysql"
       host_filter: "host.variables['replication_role'] == 'master'"
