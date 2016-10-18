@@ -1,4 +1,4 @@
-# Droid Module: droid/mysql-repln
+# Droid Module: mysql-repln
 
 Configure MySQL Server for Binary Log Replication. One or more masters and one
 or more slaves are configured, i.e. one or more clusters, each of one master

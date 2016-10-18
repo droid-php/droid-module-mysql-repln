@@ -1,6 +1,4 @@
-project:
-    name: "droid/mysql-repln"
-    description: "Configure MySQL Server for Binary Log Replication"
+description: "Configure MySQL Server for Binary Log Replication"
 
 variables:
     module_mysql_repln:
