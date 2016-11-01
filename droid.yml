@@ -1,6 +1,7 @@
 description: "Configure MySQL Server for Binary Log Replication"
 
 variables:
+    use_legacy_templating: true
     module_mysql_repln:
         binary_log_path: "/var/log/mysql/mysql-bin.log"
 
